@@ -36,6 +36,40 @@
       overflow: hidden;
       border-left: 1px solid rgba(0,255,102,0.15);
       border-right: 1px solid rgba(0,255,102,0.15);
+      transition: background 0.3s ease;
+    }
+
+    #sidePanel {
+      position: fixed;
+      left: 10px;
+      top: 80px;
+      width: 180px;
+      color: #00ff66;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .side-section {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid rgba(0,255,102,0.2);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .side-title {
+      font-size: 12px;
+      margin-bottom: 6px;
+      opacity: 0.7;
+      letter-spacing: 1px;
+    }
+
+    .side-text {
+      line-height: 1.4;
+    }
+
+    #game.powerup-active {
+      background: radial-gradient(circle at center, rgba(0,120,255,0.15), rgba(0,0,0,0.9));
     }
 
     #hud {
@@ -53,6 +87,23 @@
       z-index: 5;
       font-size: 18px;
       pointer-events: none;
+    }
+
+    #powerupStatus {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      color: #00d9ff;
+      text-shadow: 0 0 12px rgba(0,217,255,0.9);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 8;
+    }
+
+    #powerupStatus.active {
+      opacity: 1;
     }
 
     .hud-group {
@@ -106,6 +157,13 @@
       text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
       box-shadow: 0 0 14px rgba(0, 255, 102, 0.12);
       white-space: nowrap;
+    }
+
+    .powerup {
+      color: #00d9ff;
+      border-color: #00d9ff;
+      text-shadow: 0 0 14px rgba(0, 217, 255, 0.9);
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.35);
     }
 
     .enemy.targeted {
@@ -247,6 +305,19 @@
       z-index: 2;
     }
 
+    #deadlineLabel {
+      position: absolute;
+      bottom: 58px;
+      right: 10px;
+      font-size: 12px;
+      color: #ff3b3b;
+      opacity: 0.7;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(255,59,59,0.8);
+      pointer-events: none;
+      z-index: 3;
+    }
+
     #waveBanner.show {
       opacity: 1;
     }
@@ -254,6 +325,35 @@
     .small {
       font-size: 14px;
       opacity: 0.82;
+    }
+
+    .menu-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 18px;
+      text-align: left;
+    }
+
+    .info-card {
+      border: 1px solid rgba(0,255,102,0.22);
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(0,0,0,0.22);
+    }
+
+    .info-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--green);
+      letter-spacing: 1px;
+      font-size: 13px;
+    }
+
+    .info-card p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
     }
 
     @media (max-width: 560px) {
@@ -278,7 +378,7 @@
       <div class="hud-group">
         <span><span id="scoreLabel">SCORE</span><br><strong id="score">0</strong></span>
         <span>Wave: <strong id="wave">1</strong></span>
-        <span>Lives: <strong id="lives">3</strong></span>
+        <span>Lives: <strong id="lives">1</strong></span>
       </div>
       <div class="hud-group">
         <span>High Score: <strong id="highScore">0</strong></span>
@@ -287,17 +387,36 @@
     </div>
 
     <div id="waveBanner">Wave 1</div>
+    <div id="powerupStatus"></div>
 
     <div id="inputBar">
       <span id="inputText" class="empty">Type numbers...</span>
-          <div id="deadline"></div>
+    </div>
+    <div id="deadline"></div>
+    <div id="deadlineLabel">DEAD LINE</div>
+      </div>
+
+  <div id="sidePanel">
+    <div class="side-section">
+      <div class="side-title">CONTROLS</div>
+      <div class="side-text">0–9: Type numbers<br>Backspace: Delete<br>Enter/Esc: Clear<br>P: Pause</div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-title">POWER-UPS</div>
+      <div class="side-text">
+        Blue numbers = optional<br>
+        LIFE: +1 life<br>
+        FREEZE: stop enemies<br>
+        WIPE: clear enemies
+      </div>
     </div>
   </div>
 
-  <div id="menuScreen" class="screen active">
+  <div id="menuScreen"  class="screen active">
     <div class="panel">
       <h1>NUMBER BLAST</h1>
-      <p>Destroy falling numbers by typing the full sequence. Good Luck!.</p>
+      <p>Destroy falling numbers by typing the full sequence. Built for number-pad practice, finance teams, and anyone who thinks spreadsheets have made them fast.</p>
 
       <div class="settings single-setting">
         <label>
@@ -315,8 +434,20 @@
         <button id="startButton">Start Game</button>
       </div>
 
-      <p class="small">Controls: numbers to type, Backspace to correct, P to pause.</p>
-      <p class="small" style="margin-top:12px; opacity:0.6;">Created by Jason</p>
+      <div class="menu-info">
+        <div class="info-card">
+          <strong>CONTROLS</strong>
+          <p>Type numbers to destroy them.<br>Backspace deletes. Enter clears. P pauses.</p>
+        </div>
+
+        <div class="info-card">
+          <strong>POWER-UPS</strong>
+          <p>Blue numbers are optional bonuses.<br>LIFE +1, FREEZE pauses enemies, WIPE clears the screen.</p>
+        </div>
+      </div>
+
+      <p class="small" style="margin-top:14px;">Dead Line: green numbers crossing the red line cost 1 life.</p>
+      <p class="small" style="margin-top:12px; opacity:0.6;">Created by Jason G</p>
     </div>
   </div>
 
@@ -350,14 +481,13 @@
     const highScoreEl = document.getElementById("highScore");
     const inputTextEl = document.getElementById("inputText");
     const waveBannerEl = document.getElementById("waveBanner");
+    const powerupStatusEl = document.getElementById("powerupStatus");
 
     const menuScreen = document.getElementById("menuScreen");
     const pauseScreen = document.getElementById("pauseScreen");
     const gameOverScreen = document.getElementById("gameOverScreen");
     const finalStatsEl = document.getElementById("finalStats");
-
     const difficultyEl = document.getElementById("difficulty");
-    
 
     const difficultySettings = {
       easy: {
@@ -394,7 +524,7 @@
     let input = "";
     let score = 0;
     let wave = 1;
-    let lives = 3;
+    let lives = 1;
     let destroyedThisWave = 0;
     let enemiesNeededForNextWave = 8;
     let speed = 0.5;
@@ -403,12 +533,14 @@
     let animationId = null;
     let gameState = "menu";
     let settings = difficultySettings.normal;
+    let powerupSpawnedThisWave = false;
+    let powerupVisualTimer = null;
+    let freezeTimer = null;
 
-    let highScore = Number(localStorage.getItem("numberZTypeHighScore") || 0);
+    let highScore = Number(localStorage.getItem("numberBlastHighScore") || 0);
     highScoreEl.textContent = highScore;
 
     function randomNumberString() {
-      // Numbers get longer as waves increase.
       const minLength = Math.min(3 + Math.floor((wave - 1) / 3), 7);
       const maxExtra = Math.min(2 + Math.floor(wave / 4), 5);
       const length = minLength + Math.floor(Math.random() * maxExtra);
@@ -420,17 +552,44 @@
       return value;
     }
 
+    function randomPowerupNumberString() {
+      const length = 6 + Math.floor(Math.random() * 4);
+      let value = "";
+      for (let i = 0; i < length; i++) {
+        value += Math.floor(Math.random() * 10);
+      }
+      return value;
+    }
+
     function spawnEnemy() {
       if (gameState !== "playing") return;
 
+      const powerupChance = difficultyEl.value === "jill" ? 0.35 : 0.12;
+      const isPowerup = !powerupSpawnedThisWave && Math.random() < powerupChance;
       const el = document.createElement("div");
-      el.className = "enemy";
-      el.textContent = randomNumberString();
-
       const safeTopGap = 60;
       const gameRect = game.getBoundingClientRect();
-      const maxLeft = Math.max(gameRect.width - 140, 20);
+      const maxLeft = Math.max(gameRect.width - 170, 20);
 
+      let text = "";
+      let type = "enemy";
+      let power = null;
+
+      if (isPowerup) {
+        const powerTypes = difficultyEl.value === "jill"
+          ? ["LIFE", "LIFE", "LIFE", "FREEZE", "WIPE"]
+          : ["LIFE", "FREEZE", "WIPE"];
+        power = powerTypes[Math.floor(Math.random() * powerTypes.length)];
+        powerupSpawnedThisWave = true;
+        type = "powerup";
+        text = randomPowerupNumberString();
+        el.className = "enemy powerup";
+      } else {
+        text = randomNumberString();
+        el.className = "enemy";
+      }
+
+      el.textContent = text;
       el.style.left = Math.random() * maxLeft + "px";
       el.style.top = safeTopGap + "px";
 
@@ -438,9 +597,17 @@
 
       enemies.push({
         el,
-        text: el.textContent,
+        text,
+        type,
+        power,
+        x: parseFloat(el.style.left),
         y: safeTopGap,
-        speedMultiplier: 0.85 + Math.random() * 0.35
+        frozen: false,
+        zigzag: difficultyEl.value === "jill" && type === "enemy",
+        zigzagAngle: Math.random() * Math.PI * 2,
+        zigzagSpeed: 0.04 + Math.random() * 0.04,
+        zigzagAmount: 1.2 + Math.random() * 1.8,
+        speedMultiplier: type === "powerup" ? 1.45 : 0.85 + Math.random() * 0.35
       });
     }
 
@@ -449,7 +616,6 @@
       waveEl.textContent = wave;
       livesEl.textContent = lives;
       highScoreEl.textContent = highScore;
-
       inputTextEl.textContent = input || "Type numbers...";
       inputTextEl.classList.toggle("empty", input.length === 0);
     }
@@ -457,20 +623,80 @@
     function updateEnemyStyles() {
       enemies.forEach(enemy => {
         enemy.el.classList.toggle("targeted", input.length > 0 && enemy.text.startsWith(input));
-        enemy.el.classList.toggle("danger", enemy.y > window.innerHeight * 0.72);
+        enemy.el.classList.toggle("danger", enemy.type === "enemy" && enemy.y > window.innerHeight * 0.72);
       });
+    }
+
+    function showWaveBanner(message) {
+      waveBannerEl.textContent = message || `Wave ${wave}`;
+      waveBannerEl.classList.add("show");
+
+      setTimeout(() => {
+        waveBannerEl.classList.remove("show");
+      }, 900);
+    }
+
+    function triggerPowerupVisual(message, duration) {
+      clearTimeout(powerupVisualTimer);
+
+      powerupStatusEl.textContent = message;
+      powerupStatusEl.classList.add("active");
+      game.classList.add("powerup-active");
+
+      powerupVisualTimer = setTimeout(() => {
+        powerupStatusEl.classList.remove("active");
+        game.classList.remove("powerup-active");
+      }, duration);
+    }
+
+    function activatePowerup(power) {
+      if (power === "LIFE") {
+        lives = Math.min(lives + 1, 5);
+        triggerPowerupVisual("+1 LIFE ACTIVE", 1500);
+      }
+
+      if (power === "FREEZE") {
+        enemies.forEach(enemy => {
+          if (enemy.type === "enemy") enemy.frozen = true;
+        });
+
+        triggerPowerupVisual("FREEZE ACTIVE", 5000);
+        clearTimeout(freezeTimer);
+
+        freezeTimer = setTimeout(() => {
+          enemies.forEach(enemy => enemy.frozen = false);
+        }, 5000);
+      }
+
+      if (power === "WIPE") {
+        let wiped = 0;
+
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          if (enemies[i].type === "enemy") {
+            enemies[i].el.remove();
+            enemies.splice(i, 1);
+            wiped++;
+          }
+        }
+
+        score += wiped * 15;
+        triggerPowerupVisual("WIPE ACTIVE", 1500);
+      }
     }
 
     function checkInputMatch() {
       const matchIndex = enemies.findIndex(enemy => enemy.text === input);
-
       if (matchIndex === -1) return;
 
       const enemy = enemies[matchIndex];
-      const points = enemy.text.length * 10 + wave * 5;
 
-      score += points;
-      destroyedThisWave++;
+      if (enemy.type === "powerup") {
+        activatePowerup(enemy.power);
+        score += 50;
+      } else {
+        score += enemy.text.length * 10 + wave * 5;
+        destroyedThisWave++;
+      }
 
       enemy.el.remove();
       enemies.splice(matchIndex, 1);
@@ -478,7 +704,7 @@
 
       if (score > highScore) {
         highScore = score;
-        localStorage.setItem("numberZTypeHighScore", String(highScore));
+        localStorage.setItem("numberBlastHighScore", String(highScore));
       }
 
       if (destroyedThisWave >= enemiesNeededForNextWave) {
@@ -489,6 +715,7 @@
     function nextWave() {
       wave++;
       destroyedThisWave = 0;
+      powerupSpawnedThisWave = false;
       enemiesNeededForNextWave = 8 + wave * 2;
       speed = settings.baseSpeed + (wave - 1) * settings.speedPerWave;
       spawnInterval = Math.max(
@@ -498,15 +725,6 @@
 
       resetSpawnTimer();
       showWaveBanner();
-    }
-
-    function showWaveBanner() {
-      waveBannerEl.textContent = `Wave ${wave}`;
-      waveBannerEl.classList.add("show");
-
-      setTimeout(() => {
-        waveBannerEl.classList.remove("show");
-      }, 900);
     }
 
     function loseLife(enemyIndex) {
@@ -527,11 +745,31 @@
 
       for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
-        enemy.y += speed * enemy.speedMultiplier;
+
+        if (!enemy.frozen) {
+          enemy.y += speed * enemy.speedMultiplier;
+
+          if (enemy.zigzag) {
+            const gameRect = game.getBoundingClientRect();
+            const enemyWidth = enemy.el.offsetWidth || 80;
+            const maxX = Math.max(gameRect.width - enemyWidth, 0);
+
+            enemy.zigzagAngle += enemy.zigzagSpeed;
+            enemy.x += Math.sin(enemy.zigzagAngle) * enemy.zigzagAmount;
+            enemy.x = Math.max(0, Math.min(maxX, enemy.x));
+            enemy.el.style.left = enemy.x + "px";
+          }
+        }
+
         enemy.el.style.top = enemy.y + "px";
 
         if (enemy.y > window.innerHeight - 55) {
-          loseLife(i);
+          if (enemy.type === "powerup") {
+            enemy.el.remove();
+            enemies.splice(i, 1);
+          } else {
+            loseLife(i);
+          }
         }
       }
 
@@ -552,22 +790,34 @@
       enemies = [];
     }
 
+    function hideAllScreens() {
+      menuScreen.classList.remove("active");
+      pauseScreen.classList.remove("active");
+      gameOverScreen.classList.remove("active");
+    }
+
     function startGame() {
-      settings = difficultySettings[difficultyEl.value];
-      lives = 3;
+      settings = difficultySettings[difficultyEl.value] || difficultySettings.normal;
+      lives = 1;
       score = 0;
       wave = 1;
       input = "";
       destroyedThisWave = 0;
+      powerupSpawnedThisWave = false;
       enemiesNeededForNextWave = 8;
       speed = settings.baseSpeed;
       spawnInterval = settings.spawnInterval;
       gameState = "playing";
 
+      clearInterval(spawnTimer);
+      clearTimeout(powerupVisualTimer);
+      clearTimeout(freezeTimer);
+      powerupStatusEl.classList.remove("active");
+      game.classList.remove("powerup-active");
       clearEnemies();
       hideAllScreens();
       updateHud();
-      showWaveBanner();
+      showWaveBanner("Wave 1");
       resetSpawnTimer();
       spawnEnemy();
 
@@ -595,6 +845,7 @@
       gameState = "gameover";
       clearInterval(spawnTimer);
       cancelAnimationFrame(animationId);
+      clearTimeout(freezeTimer);
       clearEnemies();
 
       finalStatsEl.innerHTML = `Final Score: <strong>${score}</strong><br>Wave Reached: <strong>${wave}</strong><br>High Score: <strong>${highScore}</strong>`;
@@ -606,17 +857,15 @@
       gameState = "menu";
       clearInterval(spawnTimer);
       cancelAnimationFrame(animationId);
+      clearTimeout(powerupVisualTimer);
+      clearTimeout(freezeTimer);
       clearEnemies();
       input = "";
+      powerupStatusEl.classList.remove("active");
+      game.classList.remove("powerup-active");
       hideAllScreens();
       menuScreen.classList.add("active");
       updateHud();
-    }
-
-    function hideAllScreens() {
-      menuScreen.classList.remove("active");
-      pauseScreen.classList.remove("active");
-      gameOverScreen.classList.remove("active");
     }
 
     document.addEventListener("keydown", (event) => {
