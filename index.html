@@ -383,19 +383,65 @@
     }
 
     .panel {
-      width: min(680px, 94vw);
-      background: var(--panel);
-      border: 1px solid var(--green);
-      border-radius: 18px;
-      padding: 28px;
+      width: min(760px, 94vw);
+      background: linear-gradient(180deg, rgba(0, 34, 14, 0.94), rgba(0, 10, 5, 0.94));
+      border: 1px solid rgba(0,255,102,0.55);
+      border-radius: 20px;
+      padding: 30px;
       text-align: center;
-      box-shadow: 0 0 35px rgba(0, 255, 102, 0.18);
+      box-shadow: 0 0 40px rgba(0, 255, 102, 0.22), inset 0 0 22px rgba(0,255,102,0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(0,255,102,0.07), transparent);
+      transform: translateX(-100%);
+      animation: panelSweep 5s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes panelSweep {
+      0%, 45% { transform: translateX(-100%); }
+      65%, 100% { transform: translateX(100%); }
     }
 
     h1 {
-      margin: 0 0 10px;
-      font-size: 48px;
-      letter-spacing: 2px;
+      margin: 0;
+      font-size: 58px;
+      letter-spacing: 4px;
+      line-height: 1;
+      text-shadow: 0 0 12px rgba(0,255,102,0.9), 0 0 30px rgba(0,255,102,0.45);
+    }
+
+    .menu-title-wrap {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 14px;
+    }
+
+    .version-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 10px;
+      border: 1px solid rgba(0,217,255,0.55);
+      border-radius: 999px;
+      color: var(--blue);
+      font-size: 12px;
+      letter-spacing: 1px;
+      background: rgba(0,0,0,0.35);
+      box-shadow: 0 0 12px rgba(0,217,255,0.16);
+    }
+
+    .tagline {
+      margin: 12px auto 0;
+      max-width: 560px;
+      color: #b9ffd2;
+      font-size: 15px;
+      opacity: 0.92;
     }
 
     h2 {
@@ -411,9 +457,19 @@
     .settings {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 20px;
+      gap: 16px;
+      margin-top: 24px;
       text-align: left;
+      position: relative;
+      z-index: 1;
+    }
+
+    .setting-card {
+      padding: 14px;
+      border: 1px solid rgba(0,255,102,0.28);
+      border-radius: 12px;
+      background: rgba(0,0,0,0.32);
+      box-shadow: 0 0 18px rgba(0,255,102,0.1), inset 0 0 12px rgba(0,255,102,0.04);
     }
 
     label {
@@ -452,6 +508,17 @@
       border-radius: 10px;
       padding: 12px 18px;
       font-weight: 700;
+      box-shadow: 0 0 18px rgba(0,255,102,0.28);
+    }
+
+    #startButton {
+      min-width: 220px;
+      font-size: 22px;
+      letter-spacing: 2px;
+      padding: 15px 28px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      box-shadow: 0 0 22px rgba(0,255,102,0.38), inset 0 0 12px rgba(255,255,255,0.22);
     }
 
     button.secondary {
@@ -473,15 +540,18 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
-      margin-top: 18px;
+      margin-top: 20px;
       text-align: left;
+      position: relative;
+      z-index: 1;
     }
 
     .info-card {
-      border: 1px solid rgba(0,255,102,0.22);
-      border-radius: 10px;
-      padding: 12px;
-      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(0,255,102,0.28);
+      border-radius: 12px;
+      padding: 14px;
+      background: rgba(0,0,0,0.28);
+      box-shadow: 0 0 16px rgba(0,255,102,0.08), inset 0 0 12px rgba(0,255,102,0.04);
     }
 
     .info-card strong {
@@ -647,32 +717,39 @@
 
   <div id="menuScreen" class="screen active">
     <div class="panel">
-      <h1>KEYSTORM</h1>
-      <p>Type falling targets before they cross the dead line. Choose numbers, words, or mixed mode and survive as long as you can.</p>
+      <div class="menu-title-wrap">
+        <h1>KEYSTORM</h1>
+        <div class="version-badge">VERSION 2.1</div>
+        <p class="tagline">Lock in, clear targetsm build streaks. dont hit the deadline</p>
+      </div>
 
       <div class="settings">
-        <label>
-          Mode
-          <select id="gameMode">
-            <option value="numbers" selected>Numbers</option>
-            <option value="words">Words</option>
-            <option value="mixed">Mixed</option>
-          </select>
-        </label>
+        <div class="setting-card">
+          <label>
+            Mode
+            <select id="gameMode">
+              <option value="numbers" selected>Numbers</option>
+              <option value="words">Words</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </label>
+        </div>
 
-        <label>
-          Difficulty
-          <select id="difficulty">
-            <option value="easy">Easy</option>
-            <option value="normal" selected>Normal</option>
-            <option value="hard">Hard</option>
-            <option value="jill">Jill Mode</option>
-          </select>
-        </label>
+        <div class="setting-card">
+          <label>
+            Difficulty
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Hard</option>
+              <option value="jill">Jill Mode</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <div class="button-row">
-        <button id="startButton">Start Game</button>
+        <button id="startButton">Start Run</button>
       </div>
 
       <div class="menu-info">
@@ -683,12 +760,14 @@
 
         <div class="info-card">
           <strong>POWER-UPS</strong>
-          <p>Blue targets are optional. LIFE triggers instantly. FREEZE and WIPE are banked — press [ or ] to use them.</p>
+          <p>Blue targets are optional.<br>
+		  LIFE triggers instantly.<br>
+		  FREEZE and WIPE are banked — press [ or ] to use them.</p>
         </div>
       </div>
 
       <p class="small" style="margin-top:14px;">Green targets crossing the red line cost 1 life.</p>
-      <p class="small" style="margin-top:12px; opacity:0.6;">Created by Jason (v2.0)</p>
+      <p class="small" style="margin-top:12px; opacity:0.6; position:relative; z-index:1;">Created by Jason</p>
     </div>
   </div>
 
