@@ -412,6 +412,8 @@
         <span>Wave: <strong id="wave">1</strong></span>
         <span>Lives: <strong id="lives">1</strong></span>
         <span>Streak: <strong id="streak">0</strong></span>
+        <span>F: <strong id="freezeBank">0</strong></span>
+        <span>W: <strong id="wipeBank">0</strong></span>
       </div>
       <div class="hud-group">
         <span>High Score: <strong id="highScore">0</strong></span>
@@ -440,8 +442,8 @@
       <div class="side-text">
         Blue numbers = optional<br>
         LIFE: +1 life<br>
-        FREEZE: stop enemies<br>
-        WIPE: clear enemies
+        FREEZE: Bank Max 3, press F to use<br>
+        WIPE: Max 2, press W to use
       </div>
     </div>
   </div>
@@ -452,11 +454,11 @@
       1.0 - Game Release<br>
       1.1 - Added Accuracy & Streaks<br>
       1.2 - Added Power-ups<br>
-      1.3 - Easy mode balanced, freeze fixed, scoring updated
+      1.3 - Easy mode balanced, freeze fixed, scoring updated<br>
+	  1.4 - Ability to Bank Powerups
     </div>
   </div>
-    <textarea id="notesArea" placeholder="Write updates, ideas, feedback..."></textarea>
-  </div>
+    
 
   <div id="menuScreen"  class="screen active">
     <div class="panel">
@@ -487,12 +489,12 @@
 
         <div class="info-card">
           <strong>POWER-UPS</strong>
-          <p>Blue numbers are optional bonuses.<br>LIFE +1, FREEZE pauses enemies, WIPE clears the screen.</p>
+          <p>Blue numbers are optional bonuses.<br>LIFE activates instantly. FREEZE and WIPE are banked — press F or W to use them.</p>
         </div>
       </div>
 
       <p class="small" style="margin-top:14px;">Dead Line: green numbers crossing the red line cost 1 life.</p>
-      <p class="small" style="margin-top:12px; opacity:0.6;">Created by Jason V1.3</p>
+      <p class="small" style="margin-top:12px; opacity:0.6;">Created by Jason V1.4</p>
     </div>
   </div>
 
@@ -524,6 +526,8 @@
     const waveEl = document.getElementById("wave");
     const livesEl = document.getElementById("lives");
     const streakEl = document.getElementById("streak");
+    const freezeBankEl = document.getElementById("freezeBank");
+    const wipeBankEl = document.getElementById("wipeBank");
     const highScoreEl = document.getElementById("highScore");
     const inputTextEl = document.getElementById("inputText");
     const waveBannerEl = document.getElementById("waveBanner");
@@ -591,6 +595,8 @@
     let powerupVisualTimer = null;
     let freezeTimer = null;
     let gameFrozen = false;
+    let freezeBank = 0;
+    let wipeBank = 0;
 
     let highScore = Number(localStorage.getItem("numberBlastHighScore") || 0);
     highScoreEl.textContent = highScore;
@@ -671,6 +677,8 @@
       livesEl.textContent = lives;
       highScoreEl.textContent = highScore;
       if (streakEl) streakEl.textContent = streak;
+      if (freezeBankEl) freezeBankEl.textContent = freezeBank;
+      if (wipeBankEl) wipeBankEl.textContent = wipeBank;
       inputTextEl.textContent = input || "Type numbers...";
       inputTextEl.classList.toggle("empty", input.length === 0);
     }
@@ -707,31 +715,51 @@
       }
 
       if (power === "FREEZE") {
-        gameFrozen = true;
-        enemies.forEach(enemy => {
-          if (enemy.type === "enemy") enemy.frozen = true;
-        });
-
-        triggerPowerupVisual("FREEZE ACTIVE", 5000);
-        clearTimeout(freezeTimer);
-        freezeTimer = setTimeout(() => {
-          gameFrozen = false;
-          enemies.forEach(enemy => enemy.frozen = false);
-        }, 5000);
+        freezeBank = Math.min(freezeBank + 1, 3);
+        triggerPowerupVisual("FREEZE BANKED", 1500);
       }
 
       if (power === "WIPE") {
-        let wiped = 0;
-        for (let i = enemies.length - 1; i >= 0; i--) {
-          if (enemies[i].type === "enemy") {
-            enemies[i].el.remove();
-            enemies.splice(i, 1);
-            wiped++;
-          }
-        }
-        score += Math.round(wiped * 15 * settings.scoreMultiplier);
-        triggerPowerupVisual("WIPE ACTIVE", 1500);
+        wipeBank = Math.min(wipeBank + 1, 2);
+        triggerPowerupVisual("WIPE BANKED", 1500);
       }
+    }
+
+    function useFreeze() {
+      if (freezeBank <= 0 || gameState !== "playing" || gameFrozen) return;
+
+      freezeBank--;
+      gameFrozen = true;
+      enemies.forEach(enemy => {
+        if (enemy.type === "enemy") enemy.frozen = true;
+      });
+
+      triggerPowerupVisual("FREEZE ACTIVE", 5000);
+      clearTimeout(freezeTimer);
+      freezeTimer = setTimeout(() => {
+        gameFrozen = false;
+        enemies.forEach(enemy => enemy.frozen = false);
+      }, 5000);
+      updateHud();
+    }
+
+    function useWipe() {
+      if (wipeBank <= 0 || gameState !== "playing") return;
+
+      wipeBank--;
+      let wiped = 0;
+
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        if (enemies[i].type === "enemy") {
+          enemies[i].el.remove();
+          enemies.splice(i, 1);
+          wiped++;
+        }
+      }
+
+      score += Math.round(wiped * 15 * settings.scoreMultiplier);
+      triggerPowerupVisual("WIPE USED", 1500);
+      updateHud();
     }
 
     function checkInputMatch() {
@@ -870,6 +898,8 @@
       destroyedThisWave = 0;
       powerupSpawnedThisWave = false;
       gameFrozen = false;
+      freezeBank = 0;
+      wipeBank = 0;
       enemiesNeededForNextWave = 8;
       speed = settings.baseSpeed;
       spawnInterval = settings.spawnInterval;
@@ -940,9 +970,21 @@
     }
 
     document.addEventListener("keydown", (event) => {
-      if (event.key.toLowerCase() === "p") {
+      const key = event.key.toLowerCase();
+
+      if (key === "p") {
         if (gameState === "playing") pauseGame();
         else if (gameState === "paused") resumeGame();
+        return;
+      }
+
+      if (key === "f") {
+        useFreeze();
+        return;
+      }
+
+      if (key === "w") {
+        useWipe();
         return;
       }
 
