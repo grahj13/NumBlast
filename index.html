@@ -379,6 +379,7 @@
         <span><span id="scoreLabel">SCORE</span><br><strong id="score">0</strong></span>
         <span>Wave: <strong id="wave">1</strong></span>
         <span>Lives: <strong id="lives">1</strong></span>
+        <span>Streak: <strong id="streak">0</strong></span>
       </div>
       <div class="hud-group">
         <span>High Score: <strong id="highScore">0</strong></span>
@@ -447,7 +448,7 @@
       </div>
 
       <p class="small" style="margin-top:14px;">Dead Line: green numbers crossing the red line cost 1 life.</p>
-      <p class="small" style="margin-top:12px; opacity:0.6;">Created by Jason </p>
+      <p class="small" style="margin-top:12px; opacity:0.6;">Created by Jason</p>
     </div>
   </div>
 
@@ -478,6 +479,7 @@
     const scoreEl = document.getElementById("score");
     const waveEl = document.getElementById("wave");
     const livesEl = document.getElementById("lives");
+    const streakEl = document.getElementById("streak");
     const highScoreEl = document.getElementById("highScore");
     const inputTextEl = document.getElementById("inputText");
     const waveBannerEl = document.getElementById("waveBanner");
@@ -526,6 +528,10 @@
     let wave = 1;
     let lives = 1;
     let destroyedThisWave = 0;
+    let streak = 0;
+    let bestStreak = 0;
+    let successfulHits = 0;
+    let missedEnemies = 0;
     let enemiesNeededForNextWave = 8;
     let speed = 0.5;
     let spawnInterval = 1500;
@@ -615,6 +621,7 @@
       scoreEl.textContent = score;
       waveEl.textContent = wave;
       livesEl.textContent = lives;
+      streakEl.textContent = streak;
       highScoreEl.textContent = highScore;
       inputTextEl.textContent = input || "Type numbers...";
       inputTextEl.classList.toggle("empty", input.length === 0);
@@ -695,6 +702,16 @@
         score += 50;
       } else {
         score += enemy.text.length * 10 + wave * 5;
+        streak++;
+        successfulHits++;
+        bestStreak = Math.max(bestStreak, streak);
+
+        if (streak > 0 && streak % 5 === 0) {
+          const streakBonus = streak * 5;
+          score += streakBonus;
+          showWaveBanner(`STREAK x${streak}`);
+        }
+
         destroyedThisWave++;
       }
 
@@ -715,6 +732,10 @@
     function nextWave() {
       wave++;
       destroyedThisWave = 0;
+      streak = 0;
+      bestStreak = 0;
+      successfulHits = 0;
+      missedEnemies = 0;
       powerupSpawnedThisWave = false;
       enemiesNeededForNextWave = 8 + wave * 2;
       speed = settings.baseSpeed + (wave - 1) * settings.speedPerWave;
@@ -732,6 +753,8 @@
       enemy.el.remove();
       enemies.splice(enemyIndex, 1);
 
+      missedEnemies++;
+      streak = 0;
       lives--;
       input = "";
 
@@ -848,7 +871,10 @@
       clearTimeout(freezeTimer);
       clearEnemies();
 
-      finalStatsEl.innerHTML = `Final Score: <strong>${score}</strong><br>Wave Reached: <strong>${wave}</strong><br>High Score: <strong>${highScore}</strong>`;
+      const totalOutcomes = successfulHits + missedEnemies;
+      const accuracy = totalOutcomes === 0 ? 100 : Math.round((successfulHits / totalOutcomes) * 100);
+
+      finalStatsEl.innerHTML = `Final Score: <strong>${score}</strong><br>Wave Reached: <strong>${wave}</strong><br>Best Streak: <strong>${bestStreak}</strong><br>Accuracy: <strong>${accuracy}%</strong><br>High Score: <strong>${highScore}</strong>`;
       gameOverScreen.classList.add("active");
       updateHud();
     }
